@@ -1,2 +1,3 @@
+*.py[cod]
 web/config.php
 var/mysql_config.txt
