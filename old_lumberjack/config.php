@@ -2,16 +2,16 @@
 
 class config
 {
-	static $dbms_host = 		"mysql.sample.net";
+	static $dbms_host = 		"localhost";
 	static $dbms_port = 		"";
 	static $dbms_database = 	"lumberjack";
-	static $dbms_user = 		"lumberjack_user";
-	static $dbms_pass = 		"lumberjack_pass";
+	static $dbms_user = 		"root";
+	static $dbms_pass = 		"";
 	
-	static $default_channel =	"logbot_test";
+	static $default_channel =	"mozilla-taiwan";
 	static $default_number_of_lines = 50;
 
-	static $timezone = 		"America/Vancouver";
+	static $timezone = 		"Asia/Taipei";
 
 	static function get_db()
 	{
