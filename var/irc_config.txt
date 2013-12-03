@@ -1,0 +1,5 @@
+server: irc.mozilla.org
+port: 6667
+channel: #mozilla-taiwan
+nick: moztw-bot
+reconnect: 300

@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/python /home/moztw/irclog/var/ircbot/pierc.py

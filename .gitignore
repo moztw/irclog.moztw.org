@@ -1,2 +1,2 @@
-config.php
+web/config.php
 var/mysql_config.txt

@@ -1,0 +1,87 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          irclogbot
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start Pierc IRC Logbot service at boot time
+# Description:       Enable Pierc IRC Logbot service
+### END INIT INFO
+
+##### PATH
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/usr/bin"
+
+##### params
+EXEC="python"
+EXEC_PATH=$(which ${EXEC})
+PROG="pierc.py"
+PROG_NAME="Pierc"
+PROG_PATH="/home/moztw/irclog/var/ircbot"
+PID_FILE="/var/run/Pierc.pid"
+USER="www-data"
+GROUP="www-data"
+
+##### actions
+serv_start() {
+  echo '......starting irclogbot'
+  start-stop-daemon --make-pidfile --background --quiet --start --pidfile ${PID_FILE} --chuid ${USER}:${GROUP} --chdir ${PROG_PATH} --exec ${EXEC_PATH} ${PROG_PATH}/${PROG}
+}
+
+serv_stop() {
+  echo '......stoping irclogbot'
+  start-stop-daemon --quiet --stop --pidfile ${PID_FILE} --chuid ${USER}:${GROUP} --exec ${EXEC_PATH} ${PROG_PATH}/${PROG}
+  rm $PID_FILE
+}
+
+serv_checkpid() {
+  if [ -e $PID_FILE ]; then
+    cat $PID_FILE;
+    return 0
+  else
+    return 1
+  fi
+}
+
+##### check Python exist
+if [ ${EXEC_PATH} == "" ]; then
+      echo Error: Python is not installed. >&2
+	      exit 1
+		  fi
+
+##### Check if uid is root
+if [ $(id -u) != "0" ]; then
+      echo This script should be ran as root! >&2
+	      exit 1
+		  fi
+
+##### switch action
+case ${1} in
+  start)
+		serv_start
+		exit 0
+	;;
+	stop)
+		serv_stop
+		exit 0
+	;;
+	restart)
+	  serv_stop
+	  serv_start
+	  exit 0
+	;;
+  status)
+    PID=$(serv_checkpid) || true
+    if [ -n "$PID" ]; then
+      echo "Pierc IRC Logbot is running with PID $PID."
+      exit 0
+    else
+      echo "Pierc IRC Logbot is NOT running."
+      exit 1
+    fi
+  ;;
+	**)
+	    echo Usage: ${0} "{start|stop|restart|status}" >&2
+	    exit 1
+	;;
+esac
