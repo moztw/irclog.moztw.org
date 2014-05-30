@@ -110,6 +110,25 @@ function displayInlineMedia() {
 	});
 }
 
+//Direct channel links via ?channel=mychan
+$(document).ready(function() {
+    var channel = getUrlVars()["channel"];
+
+    $('#channellist option').each(function(){
+        if (this.value === channel){
+            $('#channellist').val(channel);
+        }
+    });
+});
+     
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+       vars[key] = value;
+    });
+        return vars;
+}
+
 // Navigate around the site based on the site hash.
 // This allows for use of the "Back" button, as well as reusable URL structure. 
 function hashnav()
@@ -466,6 +485,7 @@ function irc_render( item )
 // Make EVERY WORD A SPAN TAG moo hoo ha ha ha 
 function spanify( string )
 {
+	if (!string){ return string; }
 	var split = $(string.split(" "));
 	var join = []
 	split.each( function(i, thing)
@@ -495,6 +515,7 @@ function highlight( words )
 // Make links clickable, and images images
 function link_replace( string )
 {
+	if(!string){ return string; }
 	var links = string.match( /(https*:&#x2F;&#x2F;\S*)/g  );
 	if (links)
 	{
@@ -605,6 +626,7 @@ function human_date( date )
 // Nevetheless, escapes HTML control characters.
 function html_escape( string )
 {
+	if( !string ){ return string; }
 	string = string.replace(/&/g, '&amp;');
 	string = string.replace(/</g, '&lt;');
 	string = string.replace(/>/g, '&gt;');
