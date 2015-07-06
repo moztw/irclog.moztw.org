@@ -8,7 +8,6 @@ class db_class
 	public function __construct( $server, $port, $database, $user, $password, $timezone)
 	{
 		if ($port) { $port = ":".$port; }
-		// $this->_conn = mysqli_connect( $server.$port, $user, $password );
 		$this->_conn = new mysqli( $server.$port, $user, $password , $database);
 		if (!$this->_conn){ die ("Could not connect: " + mysqli_error() ); }
 		
@@ -52,7 +51,7 @@ class pierc_db extends db_class
 	public function get_last_n_lines( $channel, $n )
 	{
 		$channel = mysqli_real_escape_string( $this->_conn, $channel );
-		$n = (int)$n;
+		$n = (int) $n;
 		$query = "
 			SELECT id, channel, name, time, message, type, hidden FROM main WHERE channel = '$channel' ORDER BY id DESC LIMIT $n;";
 		
@@ -66,8 +65,8 @@ class pierc_db extends db_class
 	public function get_before( $channel, $id, $n )
 	{
 		$channel = mysqli_real_escape_string( $this->_conn, $channel );
-		$n = (int)$n;
-		$id = (int)$id;
+		$n = (int) $n;
+		$id = (int) $id;
 		$query = "
 			SELECT id, channel, name, time, message, type, hidden FROM main WHERE channel = '$channel' AND id < $id ORDER BY id DESC LIMIT $n;";
 		
@@ -81,8 +80,8 @@ class pierc_db extends db_class
 	public function get_after( $channel, $id, $n )
 	{
 		$channel = mysqli_real_escape_string( $this->_conn, $channel );
-		$n = (int)$n;
-		$id = (int)$id;
+		$n = (int) $n;
+		$id = (int) $id;
 		$query = "
 			SELECT id, channel, name, time, message, type, hidden FROM main WHERE channel = '$channel' AND id > $id ORDER BY time ASC, id DESC LIMIT $n;";
 		
@@ -96,7 +95,7 @@ class pierc_db extends db_class
 	public function get_lines_between_now_and_id( $channel, $id)
 	{
 		$channel = mysqli_real_escape_string( $this->_conn, $channel );
-		$id = (int)$id;
+		$id = (int) $id;
 		$query = "
 			SELECT id, channel, name, time, message, type, hidden FROM main WHERE channel = '$channel' AND id > $id ORDER BY id DESC LIMIT 500";
 		
@@ -111,7 +110,7 @@ class pierc_db extends db_class
 	public function get_count( $channel, $id)
 	{
 		$channel = mysqli_real_escape_string( $this->_conn, $channel );
-		$id = (int)$id;
+		$id = (int) $id;
 		$query = "
 			SELECT COUNT(*) as count FROM main 
 				WHERE channel = '$channel' 
@@ -149,8 +148,8 @@ class pierc_db extends db_class
 		// $n (50)/2, or 25.
 		
 
-		$id = (int)$id;
-		$n = (int)$n;
+		$id = (int) $id;
+		$n = (int) $n;
 
 		$query = "
 			SELECT channel 
@@ -207,7 +206,7 @@ class pierc_db extends db_class
 				mysqli_real_escape_string($this->_conn, $searchterm)."%' ) AND";
 		}
 		
-		$n = (int)$n;
+		$n = (int) $n;
 		$query = "
 			SELECT id, channel, name, time, message, type, hidden 
 				FROM main 
@@ -225,7 +224,7 @@ class pierc_db extends db_class
 	{
 		$tag = mysqli_real_escape_string($this->_conn, $tag);
 		$channel = mysqli_real_escape_string($this->_conn, $channel);
-		$n = (int)$n;
+		$n = (int) $n;
 		
 		$query = "
 			SELECT id, channel, name, time, message, type, hidden 
