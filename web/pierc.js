@@ -12,7 +12,7 @@ var hash = "#";			// The most recent hash value in the URL ("#search-poop")
 var channelselect = $('#channellist').val();	// Selected channel in dropdown
 
 var current_offset = 50; // The current search offset;
-var most_recent_search = ""; //The last thing searched for. 
+var most_recent_search = ""; //The last thing searched for.
 
 function everything_has_failed( xhr ){
 	clear();
@@ -31,19 +31,19 @@ $(function() {
 	$("#join-quit-toggle").click(function(){
 		hideJoinQuit();
 	});
-	
+
 	$("#inline-media-toggle").click(function(){
 		toggleInlineMedia();
 	});
 
-	$("#searchoptions").hide();	
-	
+	$("#searchoptions").hide();
+
 	// check for new content every N seconds
     setInterval("refresh()", irc_refresh_in_seconds * 1000);
     setInterval("hashnav_check()", page_hash_check_in_seconds * 1000);
-    
+
     if( ! hashnav() ) { home(); }
-	
+
 	//Toolbar setup
 	$("#load_more").click( load_more_search_results );
 	$("#search").submit( search );
@@ -71,11 +71,11 @@ $(function() {
 
 	function liveSearchSubmit () {
 	    if ($('#searchbox').val()=="")
-	    	home();
+	      home();
 	    else
-	    	search();
+        search();
 	}
-	
+
 });
 
 // Hide all join/quit messages
@@ -85,7 +85,7 @@ function hideJoinQuit() {
 	} else {
 		$('#irc .join, #irc .quit').show();
 	}
-} 
+}
 
 function toggleInlineMedia() {
 	if ($('#inline-media-toggle').is(':checked')) {
@@ -93,10 +93,10 @@ function toggleInlineMedia() {
 	} else {
 		$('#irc .inline-image').hide();
 	}
-} 
+}
 
 // Display embedable media inline
-// Only images (jpg,gif,png) right now, might extend to youtube links or something eventually
+// Only images (jpg,gif,png) and youtube links right now
 function displayInlineMedia() {
 	$('.message a:not(.inline-image-link)').each(function() {
 		link = $(this);
@@ -108,6 +108,30 @@ function displayInlineMedia() {
 		  toggleInlineMedia();
 		}
 	});
+
+
+	var vidWidth = 425;
+	var vidHeight = 344;
+
+	var obj = '<object class="inline-youtube-link" width="' + vidWidth + '" height="' + vidHeight + '">' +
+	        '<param name="movie" value="http://www.youtube.com/v/[vid]&hl=en&fs=1">' +
+	        '</param><param name="allowFullScreen" value="true"></param><param ' +
+	        'name="allowscriptaccess" value="always"></param><em' +
+	        'bed src="http://www.youtube.com/v/[vid]&hl=en&fs=1" ' +
+	        'type="application/x-shockwave-flash" allowscriptaccess="always" ' +
+	        'allowfullscreen="true" width="' + vidWidth + '" ' + 'height="' +
+	        vidHeight + '"></embed></object> ';
+
+	$('.message a:not(.inline-youtube-link):contains("youtube.com/watch")').each(function(){
+	                var that = $(this);
+	                var vid = that.html().match(/(?:v=)([\w\-]+)/g);
+	                if (vid.length) {
+	                $.each(vid, function(){
+	                        that.append( obj.replace(/\[vid\]/g, this.replace('v=','')) );
+	                        });
+	                }
+	         });
+
 }
 
 //Direct channel links via ?channel=mychan
@@ -120,7 +144,7 @@ $(document).ready(function() {
         }
     });
 });
-     
+
 function getUrlVars() {
     var vars = {};
     var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -130,7 +154,7 @@ function getUrlVars() {
 }
 
 // Navigate around the site based on the site hash.
-// This allows for use of the "Back" button, as well as reusable URL structure. 
+// This allows for use of the "Back" button, as well as reusable URL structure.
 function hashnav()
 {
 	hash = window.location.hash
@@ -147,7 +171,7 @@ function hashnav()
 		tag( tagname );
 		return true;
 	}
-	else if (hash.substring(1, 3) == "id") 
+	else if (hash.substring(1, 3) == "id")
 	{
 		var id = hash.substring( 4, hash.length );
 		context(id);
@@ -158,12 +182,12 @@ function hashnav()
 		});
 		return true;
 	}
-	else if (hash.substring(1, 5) == "home") 
+	else if (hash.substring(1, 5) == "home")
 	{
 		home();
 		return true;
 	}
-	else if (hash.substring(1, 8) == "loading") 
+	else if (hash.substring(1, 8) == "loading")
 	{
 		return true;
 	}
@@ -195,10 +219,10 @@ function home()
 	refresh_on = true;
 	$('#irc').removeClass("searchresult");
 	$("#options").show();
-	$("#searchoptions").hide();	
+	$("#searchoptions").hide();
 	// Ajax call to populate table
 	loading()
-	
+
 	//alert($('#channellist').val());
 
 	$.ajax({
@@ -207,9 +231,9 @@ function home()
 		dataType: "json",
 		success: function(data){
 			first_id = data[0].id;
-			$(data).each( function(i, item) { 	
-				$(irc_render(item)).appendTo("#irc"); 
-				last_id = item.id; 
+			$(data).each( function(i, item) {
+				$(irc_render(item)).appendTo("#irc");
+				last_id = item.id;
 			});
 			done_loading();
 			window.location.hash = "home";
@@ -217,14 +241,14 @@ function home()
 			hideJoinQuit();
 			displayInlineMedia();
 			scroll_to_bottom();
-		}, 
+		},
 		error: everything_has_failed
 	});
-	
+
 
 }
 
-// Check if anything 'new' has been said in the past minute or so. 
+// Check if anything 'new' has been said in the past minute or so.
 function refresh()
 {
 	// Selected value in dropdown
@@ -233,11 +257,11 @@ function refresh()
 	if( !refresh_on ) { return; }
 	loading();
 	$.getJSON("json.php?channel=" + channelselect, { 'type':'update', 'id': last_id },
-        function(data){
-        	$(data).each( function(i, item) { 
+      function(data){
+        $(data).each( function(i, item) {
 			try
 			{
-				$(irc_render(item)).appendTo("#irc"); last_id = item.id; 
+				$(irc_render(item)).appendTo("#irc"); last_id = item.id;
 			}
 			catch(err)
 			{
@@ -258,23 +282,23 @@ function search_for( searchvalue )
 	}
 
 	current_offset = 50;
-	most_recent_search = searchvalue;	
+	most_recent_search = searchvalue;
 	window.location.hash = "search-"+searchvalue;
 	hash = window.location.hash;
-    	
+
 	//Before
 	refresh_on = false;
 	$("#options").hide();
-	$("#searchoptions").show();	
-	
+	$("#searchoptions").show();
+
 	clear();
 	loading();
-	
+
 	// Ajax call to get search results
-	$.getJSON("json.php", {'search':searchvalue}, 
-        function(data){
-		if( data.length < 50 ) { $("#searchoptions").hide(); }	
-        	$(data).each( function(i, item) { 
+	$.getJSON("json.php", {'search':searchvalue},
+    function(data){
+      if( data.length < 50 ) { $("#searchoptions").hide(); }
+        $(data).each( function(i, item) {
 			try{
 				$(irc_render(item)).appendTo("#irc");
 			}
@@ -283,16 +307,16 @@ function search_for( searchvalue )
 			}
 		} );
 		$("#irc").addClass("searchresult");
-		done_loading(); 
-		
-		highlight( searchvalue );
-		hideJoinQuit();
-		displayInlineMedia();
+		done_loading();
+
+    highlight( searchvalue );
+    hideJoinQuit();
+    displayInlineMedia();
 		scroll_to_bottom();
         }).error(everything_has_failed);
 }
 
-// Perform a search for the search value in the #searchbox element. 
+// Perform a search for the search value in the #searchbox element.
 function search()
 {
 	var searchvalue = escape($("#searchbox").attr("value"));
@@ -307,31 +331,31 @@ function context(id)
 	clear();
 	refresh_on = false;
 	$("#options").show();
-	$("#searchoptions").hide();	
-	
+	$("#searchoptions").hide();
+
 	$('#irc').removeClass("searchresult");
 	loading();
-	
-	// Ajax call to get 'context' (find the comment at id 'id' and 'n' spaces around it). 
+
+	// Ajax call to get 'context' (find the comment at id 'id' and 'n' spaces around it).
 	$.getJSON("json.php", {'type':'context', 'id':id },
         function(data){
         	first_id = data[0].id;
-        	$(data).each( function(i, item) { 	
-			$(irc_render(item)).appendTo("#irc"); 
-			last_id = item.id; 
+        	$(data).each( function(i, item) {
+			$(irc_render(item)).appendTo("#irc");
+			last_id = item.id;
 		});
-        					
+
         	// After
-        	
+
 		$('#irc-'+id).addClass('highlighted' )
         	done_loading();
         	window.location.hash = "id-"+id;
-        	hash = window.location.hash;
-        	hideJoinQuit();
-        	displayInlineMedia();
-        	scroll_to_id( id );
+          hash = window.location.hash;
+          hideJoinQuit();
+          displayInlineMedia();
+          scroll_to_id( id );
         }).error(everything_has_failed);
-    
+
 }
 
 // Add n more search results
@@ -342,10 +366,10 @@ function load_more_search_results()
 	// Ajax call
 	loading();
 	$.getJSON("json.php", {'type':'search', 'n':40, 'offset':current_offset, 'search':most_recent_search },
-	function(data){ 
+	function(data){
         	$("#irc li:first-child").addClass("pagebreak");
 		var id = 0;
-		if( data.length < 40 ) { $("#searchoptions").hide(); }	
+		if( data.length < 40 ) { $("#searchoptions").hide(); }
 		else{ $("#searchoptions").show(); }
 		data.reverse();
 		$(data).each( function( i, item) {
@@ -362,44 +386,44 @@ function load_more_search_results()
 
 // Add a page of IRC chat _before_ the current page of IRC chat
 function page_up()
-{	
+{
 	// Selected value in dropdown
 	var channelselect = $('#channellist').val();
-	
+
 	// Ajax call to populate table
 	loading();
 	$.getJSON("json.php?channel=" + channelselect, {'type':'context', 'id':first_id, 'n':40, 'context':'before' },
         function(data){
         	$("#irc li:first-child").addClass("pagebreak");
-        	$(data).each( function(i, item) { 	
-			$(irc_render(item)).prependTo("#irc"); 
-			first_id = item.id; 
+        	$(data).each( function(i, item) {
+			$(irc_render(item)).prependTo("#irc");
+			first_id = item.id;
 		});
-        	hideJoinQuit();
-  				displayInlineMedia(); 
+          hideJoinQuit();
+  				displayInlineMedia();
         	scroll_to_id( first_id );
 		done_loading();
         }).error(everything_has_failed);
- 	return false;   
+ 	return false;
 }
 
 // Add a page of IRC chat _after_ the current page of IRC chat
 function page_down()
-{	
+{
 	// Selected value in dropdown
 	var channelselect = $('#channellist').val();
-	
+
 	loading();
-	
+
 	$.getJSON("json.php?channel=" + channelselect, {'type':'context', 'id':last_id, 'n':40, 'context':'after' },
         function(data){
         	$("#irc li:last-child").addClass("pagebreak");
-        	$(data).each( function(i, item) { 	
-			$(irc_render(item)).appendTo("#irc"); 
-			last_id = item.id; 
+        	$(data).each( function(i, item) {
+			$(irc_render(item)).appendTo("#irc");
+			last_id = item.id;
 		});
         	hideJoinQuit();
-  				displayInlineMedia(); 
+  				displayInlineMedia();
         	scroll_to_bottom();
 		done_loading();
         }).error(everything_has_failed);
@@ -419,7 +443,7 @@ function important( )
 }
 
 // Load a tag
-function tag( tagname ) 
+function tag( tagname )
 {
 	window.location.hash = "tag-"+tagname;
 	hash = window.location.hash;
@@ -427,20 +451,20 @@ function tag( tagname )
 	clear();
 	refresh_on = false;
 	$("#options").hide();
-	$("#searchoptions").hide();	
+	$("#searchoptions").hide();
 	$('#irc').removeClass("searchresult");
-	
-	loading();	
+
+	loading();
 	$.getJSON("json.php", {'type':'tag', 'tag':tagname, 'n':15 },
-        function(data){
-        	$(data).each( function(i, item) { 	
-			$(irc_render(item)).appendTo("#irc");
+    function(data){
+      $(data).each( function(i, item) {
+        $(irc_render(item)).appendTo("#irc");
 		});
-        									
+
 		done_loading();
-        	hideJoinQuit();
-  				displayInlineMedia(); 
-        	scroll_to_bottom();
+          hideJoinQuit();
+          displayInlineMedia();
+          scroll_to_bottom();
         }).error(everything_has_failed);
     return false;
 }
@@ -449,13 +473,13 @@ function tag( tagname )
 //-----------------------------------------------
 
 // Convert a single IRC message into a table row
-function irc_render( item ) 
+function irc_render( item )
 {
-	if ( item.hidden != "F" ) { return "";} 
-	
+	if ( item.hidden != "F" ) { return "";}
+
 	var message_tag = /^\s*([A-Za-z]*):/.exec(item.message);
 	var tag_tag = "";
-	if (message_tag) 
+	if (message_tag)
 	{
 		message_tag = message_tag[1].toLowerCase();
 		tag_tag = "tag";
@@ -464,16 +488,16 @@ function irc_render( item )
 	{
 		message_tag = "";
 	}
-	
+
 	var construct_string = "<li data-channel="+ html_escape(item.channel) +" id='irc-"+item.id+"' class='"+item.type+" "+message_tag+" " + tag_tag + "'>";
 	construct_string += "<span class='name'><a href='#id-"+item.id+"'>" + html_escape(item.name) + "</a>&nbsp;</span><span class='message'>";
-	
+
 	if (item.type == "join") { construct_string += "has joined #" + html_escape(item.channel); }
 	else if (item.type == "part") { construct_string += "has left #" + html_escape(item.channel) + " -- "; }
 	else if (item.type == "quit") { construct_string += "has quit -- "; }
-	else if (item.type == "topic") { construct_string += "has changed the topic: <br/>"; } 
+	else if (item.type == "topic") { construct_string += "has changed the topic: <br/>"; }
 	else if (item.type == "nick") { construct_string += " is now known as ";}
-	else if (item.type == "action") { } 
+	else if (item.type == "action") { }
 
 	construct_string += link_replace(spanify(html_escape(item.message))) + "</span>";
 	var message_date = datetimeify(item.time);
@@ -482,7 +506,7 @@ function irc_render( item )
 	return $(construct_string);
 }
 
-// Make EVERY WORD A SPAN TAG moo hoo ha ha ha 
+// Make EVERY WORD A SPAN TAG moo hoo ha ha ha
 function spanify( string )
 {
 	if (!string){ return string; }
@@ -492,7 +516,7 @@ function spanify( string )
 	{
 		if( thing[0] == 'h' && thing[1] == 't' ){ join.push( thing ); }
 		else{
-			join.push( "<span class='spanify-"+thing.toLowerCase().replace(/\W/g, '')+"'>"+thing+"</span>" ); 
+			join.push( "<span class='spanify-"+thing.toLowerCase().replace(/\W/g, '')+"'>"+thing+"</span>" );
 		}
 	});
 	return join.join(" ");
@@ -509,7 +533,7 @@ function highlight( words )
 			$("span[class*=spanify-"+word.toLowerCase().replace(/\W/g, '')+"]").addClass("highlight-"+random);
 		}
 	});
-	
+
 }
 
 // Make links clickable, and images images
@@ -520,20 +544,20 @@ function link_replace( string )
 	if (links)
 	{
 		for( var i = 0; i < links.length; i++ )
-		{	
+		{
 			var replacement = links[i]
 			if (replacement.length > 100)
 			{
 				replacement = links[i].substring(0,100) + "...";
 			}
-			
+
 			string = string.replace( links[i], "<a href='"+links[i]+"'>"+replacement+"</a>");
 		}
 	}
 	return string;
 }
 
-// Show the 'loading' widget. 
+// Show the 'loading' widget.
 function loading()
 {
 	$("#loading").fadeIn('fast');
@@ -549,7 +573,7 @@ function done_loading()
 // Clears the IRC area.
 function clear()
 {
-	$("#irc").html("");	
+	$("#irc").html("");
 }
 
 // Scroll to the bottom of the page
@@ -593,36 +617,36 @@ function human_date( date )
 {
 	var td = new Date();
 	var dt = date.toDateString()
-	if( date.getDate() == td.getDate() && 
+	if( date.getDate() == td.getDate() &&
 		date.getMonth() == td.getMonth() &&
 		date.getYear() == td.getYear() ) { dt = "Today"; }
-	
+
 	var yesterday = new Date();
 	yesterday.setDate( td.getDate() - 1 );
-		
-	if( date.getDate() == yesterday.getDate() && 
+
+	if( date.getDate() == yesterday.getDate() &&
 		date.getMonth() == yesterday.getMonth() &&
 		date.getYear() == yesterday.getYear() ) { dt = "Yesterday";}
 
 	if( hours == 0 && minutes == 0 ) { return dt + " - Midnight"; }
-	else if( hours == 12 && minutes == 0 ){ return dt + " - Noon"; } 
+	else if( hours == 12 && minutes == 0 ){ return dt + " - Noon"; }
 	else
 	{
 		var ampm = "AM";
 		var hours = date.getHours();
 		if(hours > 11){ hours = hours - 12; ampm = "PM"; }
-		
-		var minutes = date.getMinutes();
-		if( minutes < 10 ){ minutes = "0" + minutes; } 
 
-		// I find it strange, but in a 12-hour clock, '12' acts as 0. 
+		var minutes = date.getMinutes();
+		if( minutes < 10 ){ minutes = "0" + minutes; }
+
+		// I find it strange, but in a 12-hour clock, '12' acts as 0.
 		if( hours == 0 ) { hours = 12; }
 
 		return dt + " - " + hours + ":" + minutes + " " + ampm;
 	}
 }
 
-// Shouldn't this be part of javascript somewhere? 
+// Shouldn't this be part of javascript somewhere?
 // Nevetheless, escapes HTML control characters.
 function html_escape( string )
 {
